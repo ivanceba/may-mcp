@@ -1,7 +1,7 @@
 # Working on May MCP
 
 This Python 3.12 package contains validated settings and a guarded asynchronous
-HTTP client for May, vehicle/fuel/expense/trip read/write tools, and a stdio MCP server. Read
+HTTP client for May, vehicle/fuel/expense/trip/charging tools, and a stdio MCP server. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, PR, and TDD workflow.
 
 ## Layout and checks
@@ -37,6 +37,7 @@ Work on an issue branch and open a linked PR with `Closes #N`. Use TDD for
 behavior changes: observe the intended failure, implement, verify, refactor.
 Auto-merge requires green required checks and resolved blocking review findings.
 Never bypass branch rules or push implementation directly to `main`.
+After each issue's PR merges, update delivery tracker #1 with its status and PR.
 
 Keep public documentation and tool descriptions in English. Use synthetic data
 and disposable May instances for tests. Never use production writes as tests.

@@ -5,9 +5,9 @@ self-hosted vehicle manager.
 
 ## Project status
 
-Vehicle, fuel, expense and trip read and optionally enabled create/update/delete
-tools and the stdio MCP server are implemented. Charging tools, remote HTTP authentication,
-and application-specific client integrations are not implemented yet.
+Vehicle, fuel, expense, trip and charging read and optionally enabled CRUD tools
+and the stdio MCP server are implemented. Remote HTTP authentication and
+application-specific client integrations are not implemented yet.
 
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
 the implementation issues and acceptance criteria.
@@ -19,6 +19,7 @@ local MCP client using the [stdio setup guide](docs/stdio.md). Fuel fields and
 pagination behavior are documented in the [fuel guide](docs/fuel.md); see the
 [expense guide](docs/expenses.md) for amounts, categories and permissions.
 Trip fields and purpose discovery are covered in the [trip guide](docs/trips.md).
+Energy units, charger lookup and optional fields are in the [charging guide](docs/charging.md).
 
 ## Development setup
 

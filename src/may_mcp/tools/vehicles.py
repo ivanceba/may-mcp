@@ -78,8 +78,9 @@ def register_vehicle_tools(server: MCPServer[None], client: MayClient, settings:
     async def may_delete_vehicle(
         vehicle_id: Annotated[int, Field(gt=0, strict=True)],
     ) -> dict[str, Any]:
-        """Permanently delete an owned vehicle and its fuel logs, expenses, attachments,
-        specifications, trips, and charging sessions. Shared access alone cannot delete.
+        """Permanently delete an owned vehicle. May cascades deletion to associated records,
+        including fuel logs, expenses, attachments, specifications, trips, charging and parts.
+        Shared access alone cannot delete.
         No automatic retry; verify state after an uncertain outcome.
         """
         return await request("DELETE", f"/api/v1/vehicles/{vehicle_id}")
