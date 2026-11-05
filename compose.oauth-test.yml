@@ -1,0 +1,19 @@
+# Disposable synthetic IdP only; never use this profile for production.
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2@sha256:3879c623248408de29a5303178b5816c77e8dfef3890c361f8c0bbeaa979ba3b
+    command:
+      - start-dev
+      - --import-realm
+      - --features=resource-indicators
+      - --hostname=https://127.0.0.1:15060
+      - --https-certificate-file=/test-tls/cert.pem
+      - --https-certificate-key-file=/test-tls/key.pem
+    ports:
+      - "127.0.0.1:15060:8443"
+    volumes:
+      - oauth-test-state:/opt/keycloak/data
+      - ./tests/fixtures/oauth-realm.json:/opt/keycloak/data/import/realm.json:ro
+      - ${MAY_MCP_TEST_TLS_DIR:-/tmp/may-mcp-oauth-unused}:/test-tls:ro
+volumes:
+  oauth-test-state:

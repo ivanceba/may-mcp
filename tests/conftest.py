@@ -1,9 +1,16 @@
 """Synthetic fixtures and network isolation shared by every test layer."""
 
+import json
+import os
+import time
+
 import httpx
+import jwt
 import pytest
+from cryptography.hazmat.primitives.asymmetric import rsa
 from pytest_socket import disable_socket, enable_socket, socket_allow_hosts
 
+from may_mcp.auth import OAuthSettings
 from may_mcp.config import Settings
 
 
@@ -17,7 +24,12 @@ def pytest_addoption(parser):
 def offline_network_guard(request, _function_scoped_runner, monkeypatch):
     # The pinned pytest-asyncio runner must create Windows' loopback self-pipe
     # before blocking sockets; test code still cannot open a network socket.
-    for name in ("MAY_BASE_URL", "MAY_API_KEY", "MAY_MCP_ALLOW_WRITES"):
+    for name in (
+        "MAY_BASE_URL",
+        "MAY_API_KEY",
+        "MAY_MCP_ALLOW_WRITES",
+        *[name for name in os.environ if name.startswith("MAY_MCP_OAUTH_")],
+    ):
         monkeypatch.delenv(name, raising=False)
     if request.node.get_closest_marker("integration"):
         socket_allow_hosts(["127.0.0.1"], allow_unix_socket=True)
@@ -44,6 +56,37 @@ def settings_factory():
         )
 
     return factory
+
+
+@pytest.fixture
+def oauth_settings():
+    return OAuthSettings(
+        "https://idp.invalid/realms/synthetic",
+        "https://mcp.example.invalid/mcp",
+        "https://idp.invalid/realms/synthetic/protocol/openid-connect/certs",
+        frozenset({"synthetic-user"}),
+    )
+
+
+@pytest.fixture
+def signed_tokens(oauth_settings):
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    jwk = json.loads(jwt.algorithms.RSAAlgorithm.to_jwk(key.public_key()))
+    jwk.update(kid="synthetic-key", use="sig", alg="RS256")
+
+    def token(**changes):
+        claims = {
+            "iss": oauth_settings.issuer_url,
+            "aud": oauth_settings.resource_url,
+            "sub": "synthetic-user",
+            "azp": "synthetic-client",
+            "exp": int(time.time()) + 300,
+            "scope": "openid may:access",
+            **changes,
+        }
+        return jwt.encode(claims, key, algorithm="RS256", headers={"kid": "synthetic-key"})
+
+    return token, {"keys": [jwk]}
 
 
 @pytest.fixture

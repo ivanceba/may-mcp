@@ -6,8 +6,9 @@ self-hosted vehicle manager.
 ## Project status
 
 Vehicle, fuel, expense, trip and charging read and optionally enabled CRUD tools
-and the stdio MCP server are implemented. Remote HTTP authentication and
-application-specific client integrations are not implemented yet.
+and the stdio MCP server are implemented. Authenticated Streamable HTTP uses an
+external OAuth provider; see [remote authentication](docs/authentication.md).
+Application-specific client integrations remain unverified.
 The [spending summary](docs/summary.md) uses May's Home Assistant Bearer API for
 verified account currency and reports exact recorded totals with explicit coverage
 and exclusions. Owner-only currency metadata is unavailable for shared-only access.
@@ -58,11 +59,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, TDD, and PR workflow.
 For Codex development, follow the [agent setup guide](docs/development/agent-setup.md)
 and [repository instructions](AGENTS.md).
 
-## Planned integration
+## Delivery scope
 
 - Typed tools for vehicles, fuel logs, expenses, trips, and charging sessions.
 - Read-only mode by default; environment-controlled write access.
 - stdio and authenticated Streamable HTTP transports.
-- Connection examples and verification for ChatGPT, Codex, and Claude.
+- Pending: connection examples and actual verification for ChatGPT, Codex, and Claude.
 
-These are planned capabilities, not currently available features.
+The capability inventory and delivery tracker distinguish delivered functionality
+from remaining API gaps and client/deployment verification.

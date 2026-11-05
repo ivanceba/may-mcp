@@ -24,7 +24,8 @@ failing during setup verification, restored to passing, then removed.
 This is a Python-process guard, not an operating-system sandbox: subprocesses
 do not inherit monkeypatches. Keep child-process tests synthetic and explicitly
 scoped. The fixture removes inherited `MAY_BASE_URL`, `MAY_API_KEY`, and
-`MAY_MCP_ALLOW_WRITES` from the test process environment.
+`MAY_MCP_ALLOW_WRITES` and all `MAY_MCP_OAUTH_*` variables from the test process
+environment. Tests construct their own synthetic configuration.
 
 Shared fixtures:
 
@@ -118,6 +119,47 @@ Do not run two integration suites concurrently against this fixed project/port.
 The fixture refuses to reuse an existing project container before starting its
 cleanup-protected lifecycle; inspect leftovers before explicitly removing them.
 Do not substitute a production Compose file or pass production environment data.
+
+## OAuth checks
+
+The same opt-in integration command also runs
+[the OAuth suite](../../tests/integration/test_oauth_flow.py). It provisions only
+Compose project `may-mcp-oauth-test` from the pinned official Keycloak 26.8.2 image
+in [the disposable profile](../../compose.oauth-test.yml). HTTPS binds to
+`127.0.0.1:15060`; a fresh certificate and key are generated in a temporary
+directory, mounted read-only and removed after container teardown. Test HTTP
+clients trust only that generated certificate in their additional isolated trust
+context; TLS verification and secure cookies remain enabled.
+
+The fixture imports a fictitious realm/user and public PKCE clients with exact
+loopback callbacks. The separately named H2 volume exists only for this test and
+allows a provider restart to exercise persistent sessions, signing keys and
+refresh state. It is removed in `finally`; no existing state is reused.
+The fixture refuses pre-existing project containers or labeled volumes.
+
+```sh
+uv run --frozen pytest tests/protocol/test_http_auth.py -q
+uv run --frozen pytest tests/integration/test_oauth_flow.py --may-integration -q
+```
+
+The suite covers the real code/PKCE flow, incorrect proof, code replay, callback
+and resource mismatch, renewal/rotation/revocation, expiry and provider restart.
+The official SDK HTTP client then discovers tools and performs real synthetic
+May CRUD through the ASGI resource app, followed by a new read-only app instance
+that hides and rejects writes. This verifies protocol/provider/API wiring, not
+ChatGPT, Codex or Claude application interoperability or public deployment.
+Offline tests cover invalid signatures/claims, required scope, secret separation,
+metadata/challenges, Host validation, key-cache refresh/failures and client cleanup.
+
+If interrupted, inspect leftovers and remove only this explicitly named project:
+
+```sh
+docker compose --project-name may-mcp-oauth-test -f compose.oauth-test.yml down --volumes --remove-orphans
+```
+
+Never use this development IdP or its published synthetic credentials in
+production. See [authentication](../authentication.md) for provider limitations,
+shared May identity, JWT revocation delay and production persistence boundaries.
 
 ## CI and diagnostics
 

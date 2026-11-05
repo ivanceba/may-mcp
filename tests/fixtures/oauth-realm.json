@@ -1,0 +1,72 @@
+{
+  "realm": "may-mcp-test",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 120,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "users": [{
+    "id": "90000000-0000-4000-8000-000000000001",
+    "username": "synthetic-oauth-user",
+    "firstName": "Synthetic",
+    "lastName": "Test",
+    "email": "synthetic@example.invalid",
+    "enabled": true,
+    "emailVerified": true,
+    "credentials": [{"type": "password", "value": "synthetic-test-only-password", "temporary": false}]
+  }],
+  "clientScopes": [{
+    "name": "may:access",
+    "protocol": "openid-connect",
+    "attributes": {"include.in.token.scope": "true", "display.on.consent.screen": "true"},
+    "protocolMappers": [{
+      "name": "Subject required by MCP enrollment",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-sub-mapper",
+      "config": {"access.token.claim": "true", "introspection.token.claim": "true"}
+    }]
+  }],
+  "clients": [
+    {
+      "clientId": "may-mcp-resource",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "bearerOnly": true,
+      "attributes": {"resource_url": "https://mcp.example.invalid/mcp"}
+    },
+    {
+      "clientId": "synthetic-client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:15061/callback"],
+      "attributes": {"pkce.code.challenge.method": "S256"},
+      "optionalClientScopes": ["may:access"],
+      "protocolMappers": [{
+        "name": "MCP resource audience",
+        "protocol": "openid-connect",
+        "protocolMapper": "oidc-audience-mapper",
+        "config": {"included.client.audience": "may-mcp-resource", "access.token.claim": "true", "id.token.claim": "false"}
+      }]
+    },
+    {
+      "clientId": "synthetic-expiry-client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:15061/callback"],
+      "attributes": {"pkce.code.challenge.method": "S256", "access.token.lifespan": "3"},
+      "optionalClientScopes": ["may:access"],
+      "protocolMappers": [{
+        "name": "MCP resource audience",
+        "protocol": "openid-connect",
+        "protocolMapper": "oidc-audience-mapper",
+        "config": {"included.client.audience": "may-mcp-resource", "access.token.claim": "true", "id.token.claim": "false"}
+      }]
+    }
+  ]
+}
