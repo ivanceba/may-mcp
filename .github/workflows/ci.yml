@@ -78,8 +78,16 @@ jobs:
           enable-cache: true
       - run: uv python install
       - run: uv sync --locked
-      - name: Verify synthetic May and disposable Keycloak OAuth
+      - name: Verify synthetic May, OAuth and container lifecycle
         run: uv run --frozen pytest -m integration tests/integration --may-integration -q
+      - name: Remove only disposable MCP package containers
+        if: always()
+        run: |
+          for name in may-mcp-package-test may-mcp-package-test-context may-mcp-package-test-stdio; do
+            if docker container inspect "$name" >/dev/null 2>&1; then
+              docker rm --force "$name"
+            fi
+          done
       - name: Remove only the disposable test project
         if: always()
         run: docker compose --project-name may-mcp-test -f compose.test.yml down --volumes --remove-orphans

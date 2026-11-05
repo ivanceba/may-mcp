@@ -166,6 +166,43 @@ Never use this development IdP or its published synthetic credentials in
 production. See [authentication](../authentication.md) for provider limitations,
 shared May identity, JWT revocation delay and production persistence boundaries.
 
+## Container checks
+
+[Container tests](../../tests/integration/test_container.py) run under the same
+explicit opt-in and Docker requirements:
+
+```sh
+uv run --frozen pytest tests/integration/test_container.py --may-integration -q
+```
+
+The suite builds the actual locked image, checks the non-root runtime and absence
+of development dependencies, and inspects a real BuildKit context with synthetic
+private-file canaries. That context check caught a directory-reinclusion rule
+that admitted a non-Python key file before the allowlist was corrected.
+No test adds canary files to the source checkout.
+
+An image container binds only `127.0.0.1:15070`, joins the two disposable service
+networks and performs real authenticated TCP MCP calls to synthetic May. Its
+test-only certificate mount contains the generated public certificate, never
+the provider's private key. TLS verifies the test provider's `keycloak` DNS SAN;
+the image's system/runtime trust is not weakened. Production images contain no
+test certificate or test credentials.
+
+Tests verify enabled/disabled tools and CRUD after container restart, observe the
+healthcheck failing when PID 1 is stopped and recovering after SIGCONT, and stop
+via SIGTERM without forced-kill/OOM exit. An official SDK stdio subprocess also
+discovers and reads through `docker run -i --rm`, without placing a key in CLI
+arguments. ASGI protocol lifespan tests independently verify owned HTTP clients
+are closed at app shutdown. See [deployment](../deployment.md) for the expected
+Uvicorn SIGTERM exit status and the limits of readiness metadata.
+
+Reserved container names are `may-mcp-package-test`,
+`may-mcp-package-test-context` and `may-mcp-package-test-stdio`. The fixture refuses
+existing containers, removes its own containers and test image tags, and leaves
+base images/BuildKit caches alone. CI removes only those exact containers before
+tearing down the disposable May/Keycloak projects if a run fails. Do not use
+production networks, credentials or existing data volumes for these checks.
+
 ## CI and diagnostics
 
 [CI](../../.github/workflows/ci.yml) has separate quality, offline-test, and

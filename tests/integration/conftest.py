@@ -105,13 +105,21 @@ def oauth_provider(pytestconfig, request):
         .not_valid_before(datetime.now(UTC) - timedelta(minutes=1))
         .not_valid_after(datetime.now(UTC) + timedelta(hours=1))
         .add_extension(
-            x509.SubjectAlternativeName([x509.IPAddress(ipaddress.ip_address("127.0.0.1"))]),
+            x509.SubjectAlternativeName(
+                [
+                    x509.IPAddress(ipaddress.ip_address("127.0.0.1")),
+                    x509.DNSName("keycloak"),
+                ]
+            ),
             critical=False,
         )
         .add_extension(x509.BasicConstraints(ca=True, path_length=0), critical=True)
         .sign(key, hashes.SHA256())
     )
     (directory / "cert.pem").write_bytes(certificate.public_bytes(serialization.Encoding.PEM))
+    (directory / "cert.pem").chmod(
+        0o644
+    )  # Public certificate is mounted into the non-root MCP test.
     (directory / "key.pem").write_bytes(
         key.private_bytes(
             serialization.Encoding.PEM,
