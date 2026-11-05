@@ -5,9 +5,9 @@ self-hosted vehicle manager.
 
 ## Project status
 
-Vehicle listing/detail tools and the stdio MCP server are implemented. Mutating
-tools, remote HTTP authentication, and application-specific client integrations
-are not implemented yet.
+Vehicle read and optionally enabled create/update/delete tools and the stdio MCP
+server are implemented. Fuel/expense/trip/charging tools, remote HTTP authentication,
+and application-specific client integrations are not implemented yet.
 
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
 the implementation issues and acceptance criteria.
@@ -42,8 +42,8 @@ diff. CI checks formatting without changing files.
 
 Run the offline harness with `uv run --frozen pytest tests/unit tests/contract tests/protocol -q`.
 For the disposable real-May tests, Docker requirements and cleanup, see the
-[testing guide](docs/development/testing.md). Passing these harness checks does
-not demonstrate a working MCP integration; vehicle tools are still pending.
+[testing guide](docs/development/testing.md). The suite covers vehicle MCP calls
+and real synthetic May persistence; named consumer-client verification is pending.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, TDD, and PR workflow.
 For Codex development, follow the [agent setup guide](docs/development/agent-setup.md)

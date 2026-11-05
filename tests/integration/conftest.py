@@ -13,6 +13,9 @@ import pytest
 class MayTestInstance:
     base_url: str
     api_key: str = field(repr=False)
+    other_api_key: str = field(repr=False)
+    vehicle_id: int
+    other_vehicle_id: int
 
 
 @pytest.fixture(scope="session")
@@ -55,6 +58,6 @@ def may_test_instance(pytestconfig):
         data = json.loads(
             run("exec", "-T", "--user", "may", "may", "cat", "/app/data/mcp-test.json")
         )
-        yield MayTestInstance(base_url="http://127.0.0.1:15050", api_key=data["api_key"])
+        yield MayTestInstance(base_url="http://127.0.0.1:15050", **data)
     finally:
         run("down", "--volumes", "--remove-orphans")
