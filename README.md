@@ -34,9 +34,10 @@ uv build
 Apply formatting locally with `uv run ruff format .` and inspect the resulting
 diff. CI checks formatting without changing files.
 
-There are no behavioral tests yet. The isolated test harness is tracked in
-[issue #4](https://github.com/ivanceba/may-mcp/issues/4). Passing environment
-checks does not demonstrate a working MCP integration.
+Run the offline harness with `uv run --frozen pytest tests/unit tests/contract tests/protocol -q`.
+For the disposable real-May tests, Docker requirements and cleanup, see the
+[testing guide](docs/development/testing.md). Passing these harness checks does
+not demonstrate a working MCP integration; vehicle tools are still pending.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, TDD, and PR workflow.
 For Codex development, follow the [agent setup guide](docs/development/agent-setup.md)

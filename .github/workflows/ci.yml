@@ -42,3 +42,44 @@ jobs:
         run: uv run --frozen mypy src
       - name: Build package
         run: uv build
+
+  offline-tests:
+    name: Offline tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.11.8"
+          enable-cache: true
+      - run: uv python install
+      - run: uv sync --locked
+      - name: Run network-isolated test layers
+        run: uv run --frozen pytest tests/unit tests/contract tests/protocol -q
+
+  integration-tests:
+    name: Real May integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.11.8"
+          enable-cache: true
+      - run: uv python install
+      - run: uv sync --locked
+      - name: Provision synthetic May and verify authenticated API
+        run: uv run --frozen pytest -m integration tests/integration --may-integration -q
+      - name: Remove only the disposable test project
+        if: always()
+        run: docker compose --project-name may-mcp-test -f compose.test.yml down --volumes --remove-orphans

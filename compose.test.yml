@@ -1,0 +1,23 @@
+name: may-mcp-test
+
+services:
+  may:
+    # May 0.44.2, pinned independently of the production deployment.
+    image: ghcr.io/dannymcc/may:0.44.2@sha256:f556f956e822a845fca07066b97ee0d00f78dc67d02f1cfdbdf411f0635e53b7
+    restart: "no"
+    ports:
+      - "127.0.0.1:15050:5050"
+    tmpfs:
+      - /app/data
+    environment:
+      MAY_MCP_TEST_INSTANCE: "1"
+      SECRET_KEY: synthetic-test-session-key-never-use-in-production
+      ADMIN_PASSWORD: synthetic-test-password-never-use-in-production
+      DATABASE_URL: sqlite:////app/data/may.db
+      UPLOAD_FOLDER: /app/data/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5050/health')"]
+      interval: 2s
+      timeout: 5s
+      retries: 45
+      start_period: 10s

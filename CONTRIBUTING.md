@@ -18,8 +18,9 @@ Run affected regression tests and the quality checks before submitting a PR.
 Missing dependencies and syntax errors do not demonstrate a behavior's red phase.
 
 Environment configuration is verified with installation and tool checks rather
-than artificial tests that copy the configuration. The test harness will add
-offline, HTTP contract, MCP protocol, and isolated real-May test layers. Do not
+than artificial tests that copy the configuration. The test harness provides
+offline guards, HTTP contract fixtures, MCP client helpers, and an isolated
+real-May smoke test. See [the testing guide](docs/development/testing.md). Do not
 report missing or skipped integration checks as passing.
 
 ## Quality checks
@@ -33,6 +34,11 @@ uv run ruff format --check .
 uv run mypy src
 uv build
 ```
+
+Run the offline suite with `uv run --frozen pytest tests/unit tests/contract tests/protocol -q`.
+Real-May integration requires Docker and explicit opt-in; run
+`uv run --frozen pytest --may-integration -q` for the full suite, following the
+testing guide. Selected integration tests fail when provisioning is not enabled.
 
 Ruff handles both lint and formatting. Use `uv run ruff format .` to apply
 formatting. Type checks use mypy in strict mode. Do not automatically rewrite
