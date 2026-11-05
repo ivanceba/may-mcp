@@ -1,7 +1,7 @@
 # Working on May MCP
 
-This repository contains a Python 3.12 package skeleton for the May vehicle
-manager. MCP tools and transports are not implemented yet. Read
+This Python 3.12 package contains validated settings and a guarded asynchronous
+HTTP client for May. MCP tools and transports are not implemented yet. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, PR, and TDD workflow.
 
 ## Layout and checks

@@ -11,6 +11,11 @@ remote authentication, and client integrations are not implemented yet.
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
 the implementation issues and acceptance criteria.
 
+Validated settings and the guarded asynchronous May HTTP client are implemented.
+See [the HTTP boundary guide](docs/development/client.md) for configuration,
+write protection and safe error handling. These are internal library components;
+there is no runnable MCP server or client connection command yet.
+
 ## Development setup
 
 Install [uv](https://docs.astral.sh/uv/) version **0.11.8**, then run:
