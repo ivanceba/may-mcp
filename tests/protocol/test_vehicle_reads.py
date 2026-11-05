@@ -8,21 +8,6 @@ from may_mcp.errors import MayError
 from may_mcp.server import create_server
 
 
-@pytest.fixture
-async def server_factory(settings_factory):
-    clients = []
-
-    def create(handler, *, writes=False):
-        settings = settings_factory(MAY_MCP_ALLOW_WRITES="true" if writes else "false")
-        client = MayClient(settings, transport=httpx.MockTransport(handler))
-        clients.append(client)
-        return create_server(settings, client=client)
-
-    yield create
-    for client in clients:
-        await client.aclose()
-
-
 @pytest.mark.parametrize("writes", [False, True])
 async def test_catalogue_and_typed_read_only_annotations(
     server_factory, mcp_client_factory, writes
@@ -30,8 +15,11 @@ async def test_catalogue_and_typed_read_only_annotations(
     server = server_factory(lambda request: httpx.Response(200, json={}), writes=writes)
     async with mcp_client_factory(server) as client:
         tools = {tool.name: tool for tool in (await client.list_tools()).tools}
-    assert set(tools) == {"may_list_vehicles", "may_get_vehicle"}
-    for tool in tools.values():
+    reads = {"may_list_vehicles", "may_get_vehicle"}
+    writes_expected = {"may_create_vehicle", "may_update_vehicle", "may_delete_vehicle"}
+    assert set(tools) == reads | (writes_expected if writes else set())
+    for name in reads:
+        tool = tools[name]
         assert tool.annotations.read_only_hint is True
         assert tool.annotations.destructive_hint is False
         assert tool.annotations.idempotent_hint is True

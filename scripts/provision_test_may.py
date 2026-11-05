@@ -28,13 +28,31 @@ def main():
         api_key = user.generate_api_key()
         db.session.add(user)
         db.session.flush()
-        db.session.add(Vehicle(owner_id=user.id, name="MCP synthetic vehicle", vehicle_type="car"))
+        other = User(username="mcp-other", email="mcp-other@example.invalid", currency="EUR")
+        other.set_password("synthetic-unused-password")
+        other_api_key = other.generate_api_key()
+        db.session.add(other)
+        db.session.flush()
+        vehicle = Vehicle(owner_id=user.id, name="MCP synthetic vehicle", vehicle_type="car")
+        other.shared_vehicles.append(vehicle)
+        private_vehicle = Vehicle(
+            owner_id=other.id, name="Other synthetic vehicle", vehicle_type="van"
+        )
+        db.session.add_all([vehicle, private_vehicle])
         db.session.commit()
         path = Path("/app/data/mcp-test.json")
         with path.open("x", encoding="utf-8") as stream:
-            json.dump({"api_key": api_key}, stream)
+            json.dump(
+                {
+                    "api_key": api_key,
+                    "other_api_key": other_api_key,
+                    "vehicle_id": vehicle.id,
+                    "other_vehicle_id": private_vehicle.id,
+                },
+                stream,
+            )
         path.chmod(0o600)
-    print("Synthetic May account and vehicle provisioned.")
+    print("Synthetic May accounts and vehicles provisioned.")
 
 
 if __name__ == "__main__":

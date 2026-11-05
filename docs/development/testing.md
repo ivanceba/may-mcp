@@ -36,9 +36,14 @@ Shared fixtures:
 - `mcp_client_factory(server)`: the SDK Client forced into framed JSON-RPC mode
   for in-memory protocol tests, rather than SDK 2's direct in-process dispatch.
 - `may_test_instance`: integration-only disposable lifecycle and credentials;
-  its representation hides the generated key.
+  its representation hides both generated keys.
 
-Protocol tests verify vehicle read discovery, schema validation and safe errors.
+Protocol tests verify vehicle discovery, typed mutations, partial updates, safe
+errors, and rejection of direct write calls in read-only mode. Real-May CRUD
+tests verify persistence, null/zero/false updates, shared read access versus
+owner-only modification, private-vehicle read denial, and cascading fuel-log
+deletion. Other documented cascade relationships are inspected from pinned May
+models; the integration test exercises a fuel-log dependent record.
 A separate integration test starts the real stdio subprocess, reads synthetic
 May records and verifies the connection survives a tool error. This does not
 establish interoperability with ChatGPT, Codex or a particular Claude client.
@@ -66,8 +71,10 @@ uv run --frozen pytest --may-integration -q
 The fixture starts only Compose project `may-mcp-test`, waits for health, and runs
 [the provisioner](../../scripts/provision_test_may.py) inside that container as
 the May user. The provisioner checks the test-only flag, database location and
-May version before creating a synthetic account and vehicle. It refuses to seed
-the same account twice. Credentials remain in the container's temporary storage
+May version before creating two synthetic accounts, one shared vehicle owned by
+the primary account, and a private vehicle owned by the second account. It refuses
+to seed the same account twice. CRUD tests clean up additional synthetic vehicles
+in `finally`. Credentials remain in the container's temporary storage
 and fixture memory; command output is captured and never echoed on failure.
 
 May listens on host `127.0.0.1:15050`; ensure the port is free. A project-specific
