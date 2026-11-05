@@ -20,6 +20,7 @@ async def test_summary_discovery_and_unknown_currency(server_factory, mcp_client
                         "id": 1,
                         "date": "2026-01-01",
                         amount: 10,
+                        "currency": "EUR",  # Undocumented extra is not a verified source.
                         "notes": "Private record instruction text",
                     }
                 ],
