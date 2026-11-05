@@ -9,6 +9,8 @@ Vehicle, fuel, expense, trip and charging read and optionally enabled CRUD tools
 and the stdio MCP server are implemented. Authenticated Streamable HTTP uses an
 external OAuth provider; see [remote authentication](docs/authentication.md).
 Application-specific client integrations remain unverified.
+The [container deployment guide](docs/deployment.md) covers the pinned non-root
+image, runtime configuration, health checks, HTTPS proxy and external auth storage.
 The [spending summary](docs/summary.md) uses May's Home Assistant Bearer API for
 verified account currency and reports exact recorded totals with explicit coverage
 and exclusions. Owner-only currency metadata is unavailable for shared-only access.

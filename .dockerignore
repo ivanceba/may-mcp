@@ -1,0 +1,18 @@
+# Allow only package/build inputs into any Docker stage.
+**
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!src/
+src/**
+!src/may_mcp/
+src/may_mcp/**
+!src/may_mcp/*.py
+!src/may_mcp/py.typed
+!src/may_mcp/models/
+src/may_mcp/models/**
+!src/may_mcp/models/*.py
+!src/may_mcp/tools/
+src/may_mcp/tools/**
+!src/may_mcp/tools/*.py

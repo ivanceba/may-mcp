@@ -1,0 +1,23 @@
+# Standalone MCP resource server; configure an independently managed HTTPS IdP.
+services:
+  may-mcp:
+    image: may-mcp:local
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      MAY_BASE_URL: ${MAY_BASE_URL:?Set the upstream May URL}
+      MAY_API_KEY: ${MAY_API_KEY:?Set the upstream May key at runtime}
+      MAY_MCP_ALLOW_WRITES: ${MAY_MCP_ALLOW_WRITES:-false}
+      MAY_MCP_OAUTH_ISSUER: ${MAY_MCP_OAUTH_ISSUER:?Set the canonical HTTPS issuer}
+      MAY_MCP_OAUTH_RESOURCE: ${MAY_MCP_OAUTH_RESOURCE:?Set the public HTTPS resource URI}
+      MAY_MCP_OAUTH_JWKS_URL: ${MAY_MCP_OAUTH_JWKS_URL:?Set the HTTPS JWKS endpoint}
+      MAY_MCP_OAUTH_ALLOWED_SUBJECTS: ${MAY_MCP_OAUTH_ALLOWED_SUBJECTS:?Enroll approved subjects}
+      MAY_MCP_OAUTH_SCOPE: ${MAY_MCP_OAUTH_SCOPE:-may:access}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 20s
