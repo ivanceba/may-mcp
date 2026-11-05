@@ -99,8 +99,9 @@ exposes `/api/calendar/feed` and `/feed.ics`, authenticates by query token and
 returns owned-vehicle iCalendar events. This is not metadata CRUD or the JSON/
 Bearer boundary used by MCP; no calendar tool exists.
 
-`POST /api/reminders/process` accepts a valid Bearer user, admin session or
-configured internal token and triggers app-wide notifications. It is not reminder
+`POST /api/reminders/process` accepts a Bearer admin/editor subject to the global
+permission hook, an admin session or the configured internal token, and triggers
+app-wide notifications. It is not reminder
 CRUD, is not called by MCP and was not exercised by this work.
 
 ## Web-only areas awaiting a release-scope decision
