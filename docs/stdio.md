@@ -37,7 +37,7 @@ of Git. Map these launch values to your client's supported configuration.
 ChatGPT remote access and specific Codex/Claude connection verification belong
 to later integration tasks and are not demonstrated by this example.
 
-The default read-only catalogue contains ten tools:
+The default read-only catalogue contains thirteen tools:
 
 - `may_list_vehicles()`: all vehicles the configured May account can access,
   with the API's `vehicles` array and `count`.
@@ -54,6 +54,9 @@ The default read-only catalogue contains ten tools:
 - `may_list_trips(vehicle_id, limit=100, offset=0, sort="desc")`,
   `may_get_trip(trip_id)`, and `may_list_trip_purposes()`: trip reads and live
   purpose discovery.
+- `may_list_charging_sessions(vehicle_id, limit=100, offset=0, sort="desc")`,
+  `may_get_charging_session(session_id)`, and `may_list_charger_types()`: charging
+  reads and live charger discovery.
 
 These tools declare read-only, non-destructive, idempotent behavior and external
 data access. Returned vehicle fields are untrusted data. May failures become
@@ -61,7 +64,7 @@ safe tool errors with the HTTP boundary's code; errors do not close the MCP
 connection. The server lifespan closes its May HTTP client, including an injected
 client, on shutdown.
 
-With `MAY_MCP_ALLOW_WRITES=true`, twelve additional tools are registered:
+With `MAY_MCP_ALLOW_WRITES=true`, fifteen additional tools are registered:
 
 - `may_create_vehicle(vehicle)`: requires `name` and `vehicle_type` (`car`, `van`,
   `motorbike`, or `scooter`). Optional fields are `make`, `model`, `year`,
@@ -71,8 +74,9 @@ With `MAY_MCP_ALLOW_WRITES=true`, twelve additional tools are registered:
   those fields, plus `is_active`. Only supplied fields are sent in PATCH. Nullable
   fields can be cleared with `null`; zero and false are retained. Name, vehicle
   type and active status cannot be null. Updates are destructive and idempotent.
-- `may_delete_vehicle(vehicle_id)`: permanently removes an owned vehicle and its
-  fuel logs, expenses, attachments, specifications, trips, and charging sessions.
+- `may_delete_vehicle(vehicle_id)`: permanently removes an owned vehicle. May
+  cascades deletion to associated records, including fuel logs, expenses,
+  attachments, specifications, trips, charging sessions, and vehicle parts.
   Deletion is destructive and idempotent in its effect; a repeated delete returns
   `not_found` rather than another success response.
 - `may_create_fuel_log(vehicle_id, fuel)`, `may_update_fuel_log(log_id, changes)`,
@@ -84,6 +88,10 @@ With `MAY_MCP_ALLOW_WRITES=true`, twelve additional tools are registered:
 - `may_create_trip(vehicle_id, trip)`, `may_update_trip(trip_id, changes)`, and
   `may_delete_trip(trip_id)`: see [trips](trips.md) for readings, optional fuel
   levels, purpose validation and shared access.
+- `may_create_charging_session(vehicle_id, session)`,
+  `may_update_charging_session(session_id, changes)`, and
+  `may_delete_charging_session(session_id)`: see [charging](charging.md) for kWh,
+  costs, SoC percentages and time formats.
 
 All writes declare external data access, use explicit typed fields and reject
 unknown fields in the vehicle/changes object. IDs must be positive integers.

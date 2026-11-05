@@ -7,6 +7,7 @@ from mcp.server import MCPServer
 
 from may_mcp.client import MayClient
 from may_mcp.config import Settings
+from may_mcp.tools.charging import register_charging_tools
 from may_mcp.tools.expenses import register_expense_tools
 from may_mcp.tools.fuel import register_fuel_tools
 from may_mcp.tools.trips import register_trip_tools
@@ -34,4 +35,5 @@ def create_server(settings: Settings, client: MayClient | None = None) -> MCPSer
     register_fuel_tools(server, may, settings)
     register_expense_tools(server, may, settings)
     register_trip_tools(server, may, settings)
+    register_charging_tools(server, may, settings)
     return server

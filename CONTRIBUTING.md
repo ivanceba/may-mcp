@@ -5,6 +5,8 @@
 Start from an open issue with acceptance criteria. Work on a branch such as
 `feat/5-may-client` and open a PR targeting `main`. Include `Closes #N` and the
 actual verification results in the PR description.
+After an issue's PR merges, update the [delivery tracker](https://github.com/ivanceba/may-mcp/issues/1)
+with the completed task, PR and relevant verification or remaining limitations.
 
 Auto-merge is authorized once required checks pass and blocking review findings
 are resolved. Do not bypass branch rules, weaken checks, or push implementation

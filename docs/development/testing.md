@@ -53,6 +53,10 @@ and safe inaccessible-record errors using the two synthetic accounts.
 Trip tests cover purpose lookup, start/end readings including confirmed zero,
 optional fuel-level null/zero/100 semantics, preserved upstream distance/fuel-used
 fields, paginated CRUD, shared-user mutations and private-record denial.
+Charging tests use a synthetic EV for persisted energy, prices, costs, SoC and
+time formats, plus optional null/zero updates, paging, charger validation,
+shared mutations and private-record denial. Vehicle deletion warnings also name
+parts, whose additional ORM cascade is inspected in the pinned upstream models.
 A separate integration test starts the real stdio subprocess, reads synthetic
 May records and verifies the connection survives a tool error. This does not
 establish interoperability with ChatGPT, Codex or a particular Claude client.
