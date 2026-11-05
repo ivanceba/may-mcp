@@ -14,6 +14,8 @@ and exclusions. Owner-only currency metadata is unavailable for shared-only acce
 
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
 the implementation issues and acceptance criteria.
+The [capability inventory](docs/capabilities.md) records implemented operations,
+supported upstream surfaces and unresolved maintenance/reminder/document gaps.
 
 Validated settings and the guarded asynchronous May HTTP client are implemented.
 See [the HTTP boundary guide](docs/development/client.md) for configuration,
