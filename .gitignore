@@ -1,0 +1,27 @@
+# Local Superpowers design, plans, and execution evidence
+/docs/superpowers/
+
+# Local credentials and data
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+
+# Python environments, caches, and build output
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Local agent execution state
+.superpowers/
+.worktrees/
