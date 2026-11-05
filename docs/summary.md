@@ -12,20 +12,28 @@ keeps verified currencies separate, and returns amounts as exact decimal strings
 with at least two decimal places. Additional recorded decimal places are retained.
 No consumption, distance/hours totals or private notes appear in the result.
 
-## Currency limitation in May 0.44.2
+## Currency source in May 0.44.2
 
-The inspected public REST contract exposes neither a currency on these records
-nor a supported account-currency endpoint. Although May has an account currency
-internally, the MCP server cannot verify it through this API. It does not assume
-EUR, scrape web sessions or trust undocumented currency fields.
+The v1 record API has no currency field. The documented Home Assistant Bearer
+API does: `GET /api/ha/vehicles/{vehicle_id}` returns the configured account's
+`currency` for an owned vehicle. The summary validates the returned vehicle ID
+and a three-letter uppercase currency, reports `currency_status="verified_account"`
+and the endpoint as `currency_source`, and interprets recorded numeric amounts
+in that account's current monetary context. It uses no web session or database
+bypass and ignores undocumented per-record currency extras.
 
-Consequently, current real-May records produce `currency_status="unknown"`,
-`currency_source=null`, empty monetary `totals`, and an `unknown_currency`
-exclusion for each matching record. `complete=false` when matching records are
-excluded. This does **not** mean no spending was recorded. A supported upstream
-currency source is an integration gap that must be resolved before verified
-real-May monetary totals can be offered. Exact mixed-currency aggregation is
-tested with explicit verified synthetic currency inputs at the helper boundary.
+This is account-context currency, not independently verified historical transaction
+currency. The pinned schema does not retain a currency per record; the summary
+does not perform foreign-exchange conversion or prove that amounts entered by
+different contributors originally used the same currency. Exact mixed-currency
+aggregation is tested separately with explicit verified synthetic currency inputs.
+
+The Home Assistant metadata endpoint requires ownership, while v1 record reads
+allow shared access. For a shared-only vehicle, an absent endpoint, or unusable
+currency metadata, the result reports `currency_status="unknown"`,
+`currency_source=null`, empty monetary totals and `unknown_currency` exclusions
+for matching records. Matching exclusions make `complete=false`; they do not
+mean zero spending. Other upstream authentication/network failures remain errors.
 
 Exclusions contain only source, numeric record ID and reason codes. Missing or
 invalid totals and invalid dates are also excluded. `counts` counts included

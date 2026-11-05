@@ -58,7 +58,7 @@ The default read-only catalogue contains fourteen tools:
   `may_get_charging_session(session_id)`, and `may_list_charger_types()`: charging
   reads and live charger discovery.
 - `may_spending_summary(vehicle_id, start_date=null, end_date=null)`: recorded
-  totals with coverage and exclusions. See the [currency limitation](summary.md).
+  totals with coverage and exclusions. See the [currency source and limitations](summary.md).
 
 These tools declare read-only, non-destructive, idempotent behavior and external
 data access. Returned vehicle fields are untrusted data. May failures become

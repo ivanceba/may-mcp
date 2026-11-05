@@ -1,5 +1,6 @@
 """Read-only spending summaries with explicit currency and coverage limitations."""
 
+import re
 from typing import Annotated, Any
 
 from mcp.server import MCPServer
@@ -25,12 +26,26 @@ def register_summary_tools(server: MCPServer[None], client: MayClient) -> None:
     ) -> dict[str, Any]:
         """Summarize recorded spending in an inclusive date range, without tax double counting.
 
-        May 0.44.2's REST API supplies no verified currency source. Its records are excluded
-        with unknown_currency rather than assuming a currency or claiming a complete total.
+        Currency comes from May's owner-only Home Assistant Bearer API, in the configured
+        account's monetary context. Unavailable currency excludes records as unknown_currency.
         Bounded pagination reports incomplete coverage. No private notes or derived consumption.
         """
         try:
             validate_date_range(start_date, end_date)
+            currency = None
+            currency_source = None
+            try:
+                metadata = await client.request("GET", f"/api/ha/vehicles/{vehicle_id}")
+            except MayError as error:
+                if error.code != "not_found":
+                    raise
+            else:
+                if type(metadata.get("id")) is not int or metadata["id"] != vehicle_id:
+                    raise MayError("invalid_response", "May returned mismatched currency metadata.")
+                value = metadata.get("currency")
+                if isinstance(value, str) and re.fullmatch(r"[A-Z]{3}", value):
+                    currency = value
+                    currency_source = f"/api/ha/vehicles/{vehicle_id}"
             collections = {}
             for source, path in (
                 ("fuel", "fuel"),
@@ -40,10 +55,9 @@ def register_summary_tools(server: MCPServer[None], client: MayClient) -> None:
                 collections[source] = await collect_all(
                     client, f"/api/v1/vehicles/{vehicle_id}/{path}"
                 )
-            # The pinned REST contract has no supported currency field/profile endpoint.
-            # Do not trust an undocumented extra field as a verified monetary source.
+            # Use the supported account context, never undocumented per-record currency extras.
             normalized = {
-                source: [row | {"currency": None} for row in result.records]
+                source: [row | {"currency": currency} for row in result.records]
                 for source, result in collections.items()
             }
             summary = summarize_spending(
@@ -58,8 +72,8 @@ def register_summary_tools(server: MCPServer[None], client: MayClient) -> None:
                     "vehicle_id": vehicle_id,
                     "start_date": start_date,
                     "end_date": end_date,
-                    "currency_status": "unknown",
-                    "currency_source": None,
+                    "currency_status": "verified_account" if currency else "unknown",
+                    "currency_source": currency_source,
                     "coverage": {
                         source: {
                             "total": result.total,

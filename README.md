@@ -8,9 +8,9 @@ self-hosted vehicle manager.
 Vehicle, fuel, expense, trip and charging read and optionally enabled CRUD tools
 and the stdio MCP server are implemented. Remote HTTP authentication and
 application-specific client integrations are not implemented yet.
-The [spending summary](docs/summary.md) reports exact verified totals and explicit
-coverage/exclusions; May 0.44.2 lacks a supported REST currency source, so its
-records are currently excluded from monetary aggregation with currency unknown.
+The [spending summary](docs/summary.md) uses May's Home Assistant Bearer API for
+verified account currency and reports exact recorded totals with explicit coverage
+and exclusions. Owner-only currency metadata is unavailable for shared-only access.
 
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
 the implementation issues and acceptance criteria.

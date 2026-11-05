@@ -1,4 +1,4 @@
-"""Real history traversal and honest unknown-currency summaries with synthetic data."""
+"""Real history traversal and verified account-currency summaries with synthetic data."""
 
 import pytest
 from mcp.client import Client
@@ -11,7 +11,7 @@ from may_mcp.summary import collect_all
 pytestmark = pytest.mark.integration
 
 
-async def test_real_summary_reports_unknown_currency_and_full_coverage(may_test_instance):
+async def test_real_summary_verifies_account_currency_and_full_coverage(may_test_instance):
     settings = Settings(may_test_instance.base_url, may_test_instance.api_key, allow_writes=True)
     upstream = MayClient(settings)
     vehicle_id = None
@@ -66,11 +66,19 @@ async def test_real_summary_reports_unknown_currency_and_full_coverage(may_test_
             )
             assert result.is_error is not True
             summary = result.structured_content
-            assert summary["totals"] == []
-            assert summary["currency_status"] == "unknown"
-            assert summary["complete"] is False
-            assert len(summary["excluded"]) == 4
-            assert all(row["reasons"] == ["unknown_currency"] for row in summary["excluded"])
+            assert summary["totals"] == [
+                {
+                    "currency": "EUR",
+                    "fuel": "0.30",
+                    "expenses": "1.25",
+                    "charging": "2.50",
+                    "total": "4.05",
+                }
+            ]
+            assert summary["currency_status"] == "verified_account"
+            assert summary["currency_source"] == f"/api/ha/vehicles/{vehicle_id}"
+            assert summary["complete"] is True
+            assert summary["excluded"] == []
             assert all(page["complete"] for page in summary["coverage"].values())
             assert summary["coverage"]["fuel"]["count"] == 3
             assert "Private instruction-like notes" not in str(summary)
@@ -85,3 +93,36 @@ async def test_real_summary_reports_unknown_currency_and_full_coverage(may_test_
                 await upstream.request("DELETE", f"/api/v1/vehicles/{vehicle_id}")
         finally:
             await upstream.aclose()
+
+
+async def test_shared_vehicle_without_owner_currency_stays_unknown(may_test_instance):
+    owner = MayClient(
+        Settings(may_test_instance.base_url, may_test_instance.api_key, allow_writes=True)
+    )
+    other = Settings(may_test_instance.base_url, may_test_instance.other_api_key)
+    log_id = None
+    try:
+        created = await owner.request(
+            "POST",
+            f"/api/v1/vehicles/{may_test_instance.vehicle_id}/fuel",
+            json={"date": "2026-01-01", "odometer": 123, "total_cost": 0.1},
+        )
+        log_id = created["id"]
+        async with Client(create_server(other), mode="legacy", cache=None) as client:
+            result = await client.call_tool(
+                "may_spending_summary", {"vehicle_id": may_test_instance.vehicle_id}
+            )
+            assert result.is_error is not True
+            summary = result.structured_content
+            assert summary["currency_status"] == "unknown"
+            assert summary["totals"] == []
+            assert summary["complete"] is False
+            assert summary["excluded"] == [
+                {"source": "fuel", "id": log_id, "reasons": ["unknown_currency"]}
+            ]
+    finally:
+        try:
+            if log_id is not None:
+                await owner.request("DELETE", f"/api/v1/fuel/{log_id}")
+        finally:
+            await owner.aclose()

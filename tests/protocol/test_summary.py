@@ -9,6 +9,8 @@ async def test_summary_discovery_and_unknown_currency(server_factory, mcp_client
 
     def handler(request):
         calls.append(request)
+        if request.url.path.startswith("/api/ha/"):
+            return httpx.Response(404, json={"error": "Owner-only metadata unavailable"})
         source = request.url.path.rsplit("/", 1)[-1]
         key = {"fuel": "fuel_logs", "expenses": "expenses", "charging": "charging_sessions"}[source]
         amount = "cost" if source == "expenses" else "total_cost"
@@ -45,6 +47,47 @@ async def test_summary_discovery_and_unknown_currency(server_factory, mcp_client
     assert len(summary["excluded"]) == 3
     assert "Private record" not in str(summary)
     assert all(request.method == "GET" for request in calls)
+
+
+async def test_summary_uses_verified_home_assistant_currency(server_factory, mcp_client_factory):
+    def handler(request):
+        if request.url.path == "/api/ha/vehicles/1":
+            return httpx.Response(200, json={"id": 1, "currency": "EUR"})
+        source = request.url.path.rsplit("/", 1)[-1]
+        key, field, value = {
+            "fuel": ("fuel_logs", "total_cost", 0.1),
+            "expenses": ("expenses", "cost", 0.2),
+            "charging": ("charging_sessions", "total_cost", 0),
+        }[source]
+        return httpx.Response(
+            200,
+            json={
+                key: [
+                    {
+                        "id": 1,
+                        "date": "2026-01-01",
+                        field: value,
+                        "sales_tax": 0.01,
+                        "currency": "USD",
+                    }
+                ],
+                "total": 1,
+                "count": 1,
+                "limit": 100,
+                "offset": 0,
+            },
+        )
+
+    async with mcp_client_factory(server_factory(handler)) as client:
+        result = await client.call_tool("may_spending_summary", {"vehicle_id": 1})
+    assert result.is_error is not True
+    summary = result.structured_content
+    assert summary["complete"] is True
+    assert summary["currency_status"] == "verified_account"
+    assert summary["currency_source"] == "/api/ha/vehicles/1"
+    assert summary["totals"] == [
+        {"currency": "EUR", "fuel": "0.10", "expenses": "0.20", "charging": "0.00", "total": "0.30"}
+    ]
 
 
 @pytest.mark.parametrize(
