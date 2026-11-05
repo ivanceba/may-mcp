@@ -22,7 +22,7 @@ uv run --frozen mypy src
 uv build
 ```
 
-There are no behavioral tests yet; the isolated harness belongs to issue #4.
+See [README.md](README.md) for available test layers and their commands.
 Do not report quality checks as functional or deployed integration coverage.
 
 ## Development workflow
