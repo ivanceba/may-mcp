@@ -37,7 +37,7 @@ of Git. Map these launch values to your client's supported configuration.
 ChatGPT remote access and specific Codex/Claude connection verification belong
 to later integration tasks and are not demonstrated by this example.
 
-The default read-only catalogue contains seven tools:
+The default read-only catalogue contains ten tools:
 
 - `may_list_vehicles()`: all vehicles the configured May account can access,
   with the API's `vehicles` array and `count`.
@@ -51,6 +51,9 @@ The default read-only catalogue contains seven tools:
 - `may_list_expenses(vehicle_id, limit=100, offset=0, sort="desc")`,
   `may_get_expense(expense_id)`, and `may_list_categories()`: expense reads and
   live category discovery.
+- `may_list_trips(vehicle_id, limit=100, offset=0, sort="desc")`,
+  `may_get_trip(trip_id)`, and `may_list_trip_purposes()`: trip reads and live
+  purpose discovery.
 
 These tools declare read-only, non-destructive, idempotent behavior and external
 data access. Returned vehicle fields are untrusted data. May failures become
@@ -58,7 +61,7 @@ safe tool errors with the HTTP boundary's code; errors do not close the MCP
 connection. The server lifespan closes its May HTTP client, including an injected
 client, on shutdown.
 
-With `MAY_MCP_ALLOW_WRITES=true`, nine additional tools are registered:
+With `MAY_MCP_ALLOW_WRITES=true`, twelve additional tools are registered:
 
 - `may_create_vehicle(vehicle)`: requires `name` and `vehicle_type` (`car`, `van`,
   `motorbike`, or `scooter`). Optional fields are `make`, `model`, `year`,
@@ -78,6 +81,9 @@ With `MAY_MCP_ALLOW_WRITES=true`, nine additional tools are registered:
 - `may_create_expense(vehicle_id, expense)`, `may_update_expense(expense_id, changes)`,
   `may_delete_expense(expense_id)`: expense CRUD. See [expenses](expenses.md) for
   supported fields, amount semantics and shared access.
+- `may_create_trip(vehicle_id, trip)`, `may_update_trip(trip_id, changes)`, and
+  `may_delete_trip(trip_id)`: see [trips](trips.md) for readings, optional fuel
+  levels, purpose validation and shared access.
 
 All writes declare external data access, use explicit typed fields and reject
 unknown fields in the vehicle/changes object. IDs must be positive integers.
