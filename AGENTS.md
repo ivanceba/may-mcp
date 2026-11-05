@@ -1,7 +1,8 @@
 # Working on May MCP
 
 This Python 3.12 package contains validated settings and a guarded asynchronous
-HTTP client for May, domain CRUD tools, a spending summary, and a stdio MCP server. Read
+HTTP client for May, domain CRUD tools, a spending summary, stdio, and an OAuth
+protected Streamable HTTP server using an external authorization provider. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, PR, and TDD workflow.
 
 ## Layout and checks
