@@ -26,7 +26,7 @@ def provider_verifier(metadata, tls):
 
 
 async def test_real_pkce_and_may_http_crud(oauth_provider, may_test_instance):
-    metadata, _, tls = oauth_provider
+    metadata, _, tls, _ = oauth_provider
     assert "S256" in metadata["code_challenge_methods_supported"]
     async with oidc_client(tls) as oidc:
         code, proof = await authorize(oidc)
@@ -105,7 +105,7 @@ async def test_real_pkce_and_may_http_crud(oauth_provider, may_test_instance):
 
 
 async def test_real_pkce_replay_redirect_and_resource_rejections(oauth_provider):
-    _, _, tls = oauth_provider
+    _, _, tls, _ = oauth_provider
     async with oidc_client(tls) as oidc:
         code, proof = await authorize(oidc)
         bad = await exchange(oidc, code, "incorrect-proof-" + "x" * 48)
@@ -123,7 +123,7 @@ async def test_real_pkce_replay_redirect_and_resource_rejections(oauth_provider)
 
 
 async def test_real_refresh_revocation_and_provider_restart(oauth_provider):
-    metadata, restart, tls = oauth_provider
+    metadata, restart, tls, _ = oauth_provider
     async with oidc_client(tls) as oidc:
         code, proof = await authorize(oidc)
         issued = (await exchange(oidc, code, proof)).json()
@@ -194,7 +194,7 @@ async def test_real_refresh_revocation_and_provider_restart(oauth_provider):
 async def test_real_short_lived_access_token_expires(oauth_provider):
     import asyncio
 
-    metadata, _, tls = oauth_provider
+    metadata, _, tls, _ = oauth_provider
     async with oidc_client(tls) as oidc:
         code, proof = await authorize(oidc, client_id="synthetic-expiry-client")
         response = await exchange(oidc, code, proof, client_id="synthetic-expiry-client")
@@ -208,3 +208,9 @@ async def test_real_short_lived_access_token_expires(oauth_provider):
         assert await verifier.verify_token(data["access_token"]) is None
     finally:
         await verifier.aclose()
+
+
+def test_ephemeral_tls_key_has_no_group_or_other_access(oauth_provider):
+    _, _, _, directory = oauth_provider
+    assert directory.stat().st_mode & 0o077 == 0
+    assert (directory / "key.pem").stat().st_mode & 0o077 == 0

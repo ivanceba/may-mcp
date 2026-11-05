@@ -1,5 +1,7 @@
 """Real ASGI authorization boundary before any May network call."""
 
+from dataclasses import replace
+
 import httpx
 import httpx2
 import pytest
@@ -10,6 +12,55 @@ from may_mcp.auth import JWTVerifier, OAuthSettings
 from may_mcp.client import MayClient
 from may_mcp.errors import MayError
 from may_mcp.server import create_http_app
+
+
+@pytest.mark.parametrize(
+    "configured,canonical",
+    [
+        ("https://mcp.example.invalid:443/mcp", "https://mcp.example.invalid/mcp"),
+        ("https://MCP.EXAMPLE.INVALID/mcp", "https://mcp.example.invalid/mcp"),
+        ("https://[::1]/mcp", "https://[::1]/mcp"),
+        ("http://[::1]:8000/mcp", "http://[::1]:8000/mcp"),
+    ],
+)
+async def test_canonical_host_origin_and_ipv6_initialize(
+    settings_factory, oauth_settings, signed_tokens, configured, canonical
+):
+    token, keys = signed_tokens
+    oauth = replace(oauth_settings, resource_url=configured, allow_loopback_http=True)
+    verifier = JWTVerifier(
+        oauth, transport=httpx.MockTransport(lambda request: httpx.Response(200, json=keys))
+    )
+    app = create_http_app(settings_factory(), oauth, verifier=verifier)
+    async with (
+        app.router.lifespan_context(app),
+        httpx.AsyncClient(transport=httpx.ASGITransport(app)) as client,
+    ):
+        metadata = await client.get(
+            canonical.removesuffix("/mcp") + "/.well-known/oauth-protected-resource/mcp"
+        )
+        assert metadata.status_code == 200
+        assert metadata.json()["resource"] == canonical
+        response = await client.post(
+            canonical,
+            headers={
+                "Authorization": "Bearer " + token(aud=oauth.resource_url),
+                "Origin": canonical.removesuffix("/mcp"),
+                "Accept": "application/json, text/event-stream",
+            },
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": "2025-06-18",
+                    "capabilities": {},
+                    "clientInfo": {"name": "synthetic-canonical-host", "version": "1"},
+                },
+            },
+        )
+        assert response.status_code == 200
+        assert "result" in response.json()
 
 
 async def test_http_requires_oauth_before_mcp_initialization(settings_factory):

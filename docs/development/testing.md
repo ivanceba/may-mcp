@@ -127,7 +127,12 @@ The same opt-in integration command also runs
 Compose project `may-mcp-oauth-test` from the pinned official Keycloak 26.8.2 image
 in [the disposable profile](../../compose.oauth-test.yml). HTTPS binds to
 `127.0.0.1:15060`; a fresh certificate and key are generated in a temporary
-directory, mounted read-only and removed after container teardown. Test HTTP
+directory, mounted read-only and removed after container teardown.
+The directory is owner-only (`0700`) and the private key is owner-only (`0600`).
+Run these tests as a non-root Linux/WSL user; the fixture runs Keycloak with that
+same UID, retaining the official image's group 0 for its writable data directory.
+It does not make the TLS key group/world-readable to handle CI UID differences.
+Test HTTP
 clients trust only that generated certificate in their additional isolated trust
 context; TLS verification and secure cookies remain enabled.
 

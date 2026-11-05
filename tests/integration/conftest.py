@@ -79,6 +79,8 @@ def oauth_provider(pytestconfig, request):
         pytest.fail("Disposable OAuth requires --may-integration and Docker.")
     if not shutil.which("docker"):
         pytest.fail("Run inside WSL when Docker is available there.")
+    if os.name != "posix" or os.getuid() == 0:
+        pytest.fail("Disposable OAuth requires a non-root Linux/WSL test user.")
     root = Path(__file__).resolve().parents[2]
     command = [
         "docker",
@@ -91,7 +93,7 @@ def oauth_provider(pytestconfig, request):
     temporary = tempfile.TemporaryDirectory(prefix="may-mcp-oauth-test-")
     request.addfinalizer(temporary.cleanup)
     directory = Path(temporary.name)
-    directory.chmod(0o755)
+    directory.chmod(0o700)
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "Synthetic OAuth test")])
     certificate = (
@@ -117,10 +119,14 @@ def oauth_provider(pytestconfig, request):
             serialization.NoEncryption(),
         )
     )
-    # A fresh synthetic test key, readable across host/container UIDs only for this mount.
-    (directory / "key.pem").chmod(0o644)
+    # Keycloak runs with this non-root user's UID; key access stays owner-only.
+    (directory / "key.pem").chmod(0o600)
     tls = ssl.create_default_context(cafile=str(directory / "cert.pem"))
-    environment = {**os.environ, "MAY_MCP_TEST_TLS_DIR": str(directory)}
+    environment = {
+        **os.environ,
+        "MAY_MCP_TEST_TLS_DIR": str(directory),
+        "MAY_MCP_TEST_UID": str(os.getuid()),
+    }
 
     def run(*args, timeout=180):
         result = subprocess.run(
@@ -173,6 +179,6 @@ def oauth_provider(pytestconfig, request):
             run("restart", "keycloak")
             return ready()
 
-        yield metadata, restart, tls
+        yield metadata, restart, tls, directory
     finally:
         run("down", "--volumes", "--remove-orphans")

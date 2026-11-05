@@ -111,7 +111,7 @@ def create_http_app(
                 await tokens.aclose()
 
     app.router.lifespan_context = lifespan
-    app.add_middleware(
-        TrustedHostMiddleware, allowed_hosts=[resource.hostname or ""], www_redirect=False
-    )
+    hostname = resource.hostname or ""
+    trusted_host = f"[{hostname}]" if ":" in hostname else hostname
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=[trusted_host], www_redirect=False)
     return app

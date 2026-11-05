@@ -90,7 +90,10 @@ resource-server restart. OAuth authorization does not create separate May accoun
 
 All configured OAuth URLs require HTTPS and reject credentials, query strings,
 fragments and ambiguous path segments. The resource URL must have a nonempty path
-without a trailing slash. `MAY_MCP_OAUTH_ALLOW_LOOPBACK_HTTP=true` is an explicit
+without a trailing slash. Its host is canonicalized to lowercase and its default
+port is omitted; register the resulting canonical resource URI with the provider.
+IPv6 literal hosts retain brackets in HTTP Host/Origin validation.
+`MAY_MCP_OAUTH_ALLOW_LOOPBACK_HTTP=true` is an explicit
 test exception for numeric loopback HTTP URLs only, never public/LAN hosts.
 The real Keycloak integration tests use HTTPS with a freshly generated test
 certificate verified through an isolated trust context, not that exception.

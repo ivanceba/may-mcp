@@ -55,7 +55,9 @@ class OAuthSettings:
                     valid = valid and bool(url.path.strip("/")) and not url.path.endswith("/")
                 if not valid:
                     raise ValueError
-                httpx.URL(value)
+                parsed = httpx.URL(value)
+                if name == "resource_url":
+                    object.__setattr__(self, name, str(parsed))
             except (ValueError, TypeError, httpx.InvalidURL):
                 raise ValueError(
                     f"OAuth {name} must be a fixed HTTPS URL without credentials."
