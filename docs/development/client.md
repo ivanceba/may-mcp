@@ -3,7 +3,7 @@
 `Settings.from_env(mapping)` validates one fixed May instance and its API key.
 The caller supplies a mapping such as `os.environ`; the library does not read
 `.env` files or discover a server automatically. See [.env.example](../../.env.example)
-for variable names. The MCP CLI and tools are not implemented yet.
+for variable names. The [stdio server](../stdio.md) uses this configuration.
 
 - `MAY_BASE_URL`: HTTP(S) instance URL, optionally with a plain mount prefix such
   as `https://may.example.invalid/may`. Credentials, queries, fragments, percent
@@ -49,8 +49,8 @@ been saved. The error sets `outcome_unknown=True` and instructs the caller to
 verify before repeating. This is conservative; it does not mean a write occurred.
 Read failures and explicit 4xx rejections have `outcome_unknown=False`.
 
-This HTTP guard is one layer. Hiding write tools in read-only MCP discovery will
-be implemented with those tools; enabling writes never grants extra May account
+This HTTP guard is one layer. When mutating tools are introduced, read-only MCP
+discovery must also omit them. Enabling writes never grants extra May account
 permissions. The pinned disposable May integration verifies authenticated reads,
 invalid credentials, and unchanged data after a blocked write. See the
 [testing guide](testing.md) for setup and synthetic-data boundaries.

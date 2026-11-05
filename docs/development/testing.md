@@ -33,12 +33,15 @@ Shared fixtures:
   environment inputs; overrides use the environment variable names.
 - `mock_may_http(handler=None)`: HTTPX MockTransport; unexpected requests fail
   when no handler is provided.
-- `mcp_client_factory(server)`: the SDK Client for in-memory protocol tests.
+- `mcp_client_factory(server)`: the SDK Client forced into framed JSON-RPC mode
+  for in-memory protocol tests, rather than SDK 2's direct in-process dispatch.
 - `may_test_instance`: integration-only disposable lifecycle and credentials;
   its representation hides the generated key.
 
-The protocol fixture is ready for issue #6. No production MCP server or vehicle
-tools exist yet; this harness does not demonstrate their functionality.
+Protocol tests verify vehicle read discovery, schema validation and safe errors.
+A separate integration test starts the real stdio subprocess, reads synthetic
+May records and verifies the connection survives a tool error. This does not
+establish interoperability with ChatGPT, Codex or a particular Claude client.
 
 ## Real-May checks
 

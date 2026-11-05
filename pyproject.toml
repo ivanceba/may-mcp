@@ -13,11 +13,15 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "httpx>=0.28,<1",
     "mcp>=2.3,<3",
+    "pydantic>=2.12,<3",
 ]
 
 [project.urls]
 Repository = "https://github.com/ivanceba/may-mcp"
 Issues = "https://github.com/ivanceba/may-mcp/issues"
+
+[project.scripts]
+may-mcp = "may_mcp.__main__:main"
 
 [dependency-groups]
 dev = [

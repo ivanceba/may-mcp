@@ -1,12 +1,13 @@
 # Working on May MCP
 
 This Python 3.12 package contains validated settings and a guarded asynchronous
-HTTP client for May. MCP tools and transports are not implemented yet. Read
+HTTP client for May, vehicle read tools, and a stdio MCP server. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, PR, and TDD workflow.
 
 ## Layout and checks
 
 - `src/may_mcp/`: package source.
+- `src/may_mcp/tools/`: explicit typed MCP tools.
 - `.github/workflows/ci.yml`: Windows and Ubuntu quality checks.
 - `.agents/skills/ponytail/`: pinned, instruction-only Ponytail skill.
 - [Agent setup](docs/development/agent-setup.md): prerequisites and discovery checks.

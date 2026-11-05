@@ -5,16 +5,17 @@ self-hosted vehicle manager.
 
 ## Project status
 
-The development environment and quality gates are configured. Vehicle tools, the MCP server,
-remote authentication, and client integrations are not implemented yet.
+Vehicle listing/detail tools and the stdio MCP server are implemented. Mutating
+tools, remote HTTP authentication, and application-specific client integrations
+are not implemented yet.
 
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
 the implementation issues and acceptance criteria.
 
 Validated settings and the guarded asynchronous May HTTP client are implemented.
 See [the HTTP boundary guide](docs/development/client.md) for configuration,
-write protection and safe error handling. These are internal library components;
-there is no runnable MCP server or client connection command yet.
+write protection and safe error handling. Run `uv run --frozen may-mcp` from a
+local MCP client using the [stdio setup guide](docs/stdio.md).
 
 ## Development setup
 
