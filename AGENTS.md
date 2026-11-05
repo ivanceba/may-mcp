@@ -1,7 +1,7 @@
 # Working on May MCP
 
 This Python 3.12 package contains validated settings and a guarded asynchronous
-HTTP client for May, vehicle/fuel read/write tools, and a stdio MCP server. Read
+HTTP client for May, vehicle/fuel/expense read/write tools, and a stdio MCP server. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, PR, and TDD workflow.
 
 ## Layout and checks
