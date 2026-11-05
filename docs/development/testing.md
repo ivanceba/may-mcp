@@ -44,6 +44,9 @@ tests verify persistence, null/zero/false updates, shared read access versus
 owner-only modification, private-vehicle read denial, and cascading fuel-log
 deletion. Other documented cascade relationships are inspected from pinned May
 models; the integration test exercises a fuel-log dependent record.
+Fuel tests additionally cover full-history page metadata, malformed upstream
+pages, bounds/order, strict dates/numbers, real fuel CRUD with tax totals,
+unknown versus confirmed-zero readings and May's zero-to-null normalization.
 A separate integration test starts the real stdio subprocess, reads synthetic
 May records and verifies the connection survives a tool error. This does not
 establish interoperability with ChatGPT, Codex or a particular Claude client.
