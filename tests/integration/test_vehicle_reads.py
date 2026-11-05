@@ -25,7 +25,12 @@ async def test_stdio_vehicle_reads_and_error_recovery(may_test_instance, capfd):
     # Includes subprocess startup on slow shared Windows/WSL filesystems.
     async with asyncio.timeout(60), Client(process, cache=None) as client:
         tools = await client.list_tools()
-        assert {tool.name for tool in tools.tools} == {"may_list_vehicles", "may_get_vehicle"}
+        assert {tool.name for tool in tools.tools} == {
+            "may_list_vehicles",
+            "may_get_vehicle",
+            "may_list_fuel_logs",
+            "may_get_fuel_log",
+        }
         listed = await client.call_tool("may_list_vehicles", {})
         vehicle = listed.structured_content["vehicles"][0]
         detail = await client.call_tool("may_get_vehicle", {"vehicle_id": vehicle["id"]})

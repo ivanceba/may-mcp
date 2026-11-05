@@ -37,7 +37,7 @@ of Git. Map these launch values to your client's supported configuration.
 ChatGPT remote access and specific Codex/Claude connection verification belong
 to later integration tasks and are not demonstrated by this example.
 
-The default read-only catalogue contains two tools:
+The default read-only catalogue contains four tools:
 
 - `may_list_vehicles()`: all vehicles the configured May account can access,
   with the API's `vehicles` array and `count`.
@@ -45,13 +45,17 @@ The default read-only catalogue contains two tools:
   positive integer; zero, negative values, booleans and numeric strings fail
   validation before any upstream request.
 
-Both tools declare read-only, non-destructive, idempotent behavior and external
+- `may_list_fuel_logs(vehicle_id, limit=100, offset=0, sort="desc")`: a bounded
+  page with truthful coverage metadata.
+- `may_get_fuel_log(log_id)`: one accessible fuel log.
+
+These tools declare read-only, non-destructive, idempotent behavior and external
 data access. Returned vehicle fields are untrusted data. May failures become
 safe tool errors with the HTTP boundary's code; errors do not close the MCP
 connection. The server lifespan closes its May HTTP client, including an injected
 client, on shutdown.
 
-With `MAY_MCP_ALLOW_WRITES=true`, three additional tools are registered:
+With `MAY_MCP_ALLOW_WRITES=true`, six additional tools are registered:
 
 - `may_create_vehicle(vehicle)`: requires `name` and `vehicle_type` (`car`, `van`,
   `motorbike`, or `scooter`). Optional fields are `make`, `model`, `year`,
@@ -65,6 +69,9 @@ With `MAY_MCP_ALLOW_WRITES=true`, three additional tools are registered:
   fuel logs, expenses, attachments, specifications, trips, and charging sessions.
   Deletion is destructive and idempotent in its effect; a repeated delete returns
   `not_found` rather than another success response.
+- `may_create_fuel_log(vehicle_id, fuel)`, `may_update_fuel_log(log_id, changes)`,
+  `may_delete_fuel_log(log_id)`: explicit fuel CRUD. See the [fuel guide](fuel.md)
+  for fields, odometer semantics and the pinned API's normalization behavior.
 
 All writes declare external data access, use explicit typed fields and reject
 unknown fields in the vehicle/changes object. IDs must be positive integers.

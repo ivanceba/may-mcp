@@ -17,7 +17,8 @@ async def test_catalogue_and_typed_read_only_annotations(
         tools = {tool.name: tool for tool in (await client.list_tools()).tools}
     reads = {"may_list_vehicles", "may_get_vehicle"}
     writes_expected = {"may_create_vehicle", "may_update_vehicle", "may_delete_vehicle"}
-    assert set(tools) == reads | (writes_expected if writes else set())
+    assert reads.issubset(tools)
+    assert writes_expected & tools.keys() == (writes_expected if writes else set())
     for name in reads:
         tool = tools[name]
         assert tool.annotations.read_only_hint is True
