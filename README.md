@@ -5,7 +5,7 @@ self-hosted vehicle manager.
 
 ## Project status
 
-The development environment is being prepared. Vehicle tools, the MCP server,
+The development environment and quality gates are configured. Vehicle tools, the MCP server,
 remote authentication, and client integrations are not implemented yet.
 
 Follow [the delivery tracker](https://github.com/ivanceba/may-mcp/issues/1) for
@@ -39,6 +39,8 @@ There are no behavioral tests yet. The isolated test harness is tracked in
 checks does not demonstrate a working MCP integration.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, TDD, and PR workflow.
+For Codex development, follow the [agent setup guide](docs/development/agent-setup.md)
+and [repository instructions](AGENTS.md).
 
 ## Planned integration
 
