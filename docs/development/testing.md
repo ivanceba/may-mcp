@@ -47,6 +47,9 @@ models; the integration test exercises a fuel-log dependent record.
 Fuel tests additionally cover full-history page metadata, malformed upstream
 pages, bounds/order, strict dates/numbers, real fuel CRUD with tax totals,
 unknown versus confirmed-zero readings and May's zero-to-null normalization.
+Expense tests cover live category lookup, amount/date/optional-field persistence,
+instruction-like notes retained as data, full-history pagination, shared mutations
+and safe inaccessible-record errors using the two synthetic accounts.
 A separate integration test starts the real stdio subprocess, reads synthetic
 May records and verifies the connection survives a tool error. This does not
 establish interoperability with ChatGPT, Codex or a particular Claude client.
