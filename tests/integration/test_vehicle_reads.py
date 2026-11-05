@@ -39,6 +39,7 @@ async def test_stdio_vehicle_reads_and_error_recovery(may_test_instance, capfd):
             "may_list_charging_sessions",
             "may_get_charging_session",
             "may_list_charger_types",
+            "may_spending_summary",
         }
         listed = await client.call_tool("may_list_vehicles", {})
         vehicle = listed.structured_content["vehicles"][0]
