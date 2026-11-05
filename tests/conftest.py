@@ -4,6 +4,8 @@ import httpx
 import pytest
 from pytest_socket import disable_socket, enable_socket, socket_allow_hosts
 
+from may_mcp.config import Settings
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -29,15 +31,17 @@ def offline_network_guard(request, _function_scoped_runner, monkeypatch):
 
 @pytest.fixture
 def settings_factory():
-    """Synthetic environment input; task #5 will add validated Settings."""
+    """Build validated Settings exclusively from synthetic environment input."""
 
     def factory(**overrides):
-        return {
-            "MAY_BASE_URL": "https://may.invalid",
-            "MAY_API_KEY": "synthetic-test-key",
-            "MAY_MCP_ALLOW_WRITES": "false",
-            **overrides,
-        }
+        return Settings.from_env(
+            {
+                "MAY_BASE_URL": "https://may.invalid",
+                "MAY_API_KEY": "synthetic-test-key",
+                "MAY_MCP_ALLOW_WRITES": "false",
+                **overrides,
+            }
+        )
 
     return factory
 

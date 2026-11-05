@@ -29,8 +29,8 @@ scoped. The fixture removes inherited `MAY_BASE_URL`, `MAY_API_KEY`, and
 Shared fixtures:
 
 - `synthetic_vehicle`: a full fictitious May 0.44.2 vehicle response.
-- `settings_factory(**overrides)`: synthetic environment inputs; the validated
-  Settings class belongs to issue #5 and will extend this fixture.
+- `settings_factory(**overrides)`: build validated Settings from synthetic
+  environment inputs; overrides use the environment variable names.
 - `mock_may_http(handler=None)`: HTTPX MockTransport; unexpected requests fail
   when no handler is provided.
 - `mcp_client_factory(server)`: the SDK Client for in-memory protocol tests.
