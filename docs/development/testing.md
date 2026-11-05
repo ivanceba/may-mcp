@@ -57,6 +57,11 @@ Charging tests use a synthetic EV for persisted energy, prices, costs, SoC and
 time formats, plus optional null/zero updates, paging, charger validation,
 shared mutations and private-record denial. Vehicle deletion warnings also name
 parts, whose additional ORM cascade is inspected in the pinned upstream models.
+Summary tests cover exact Decimal sums, included tax, separate currencies,
+inclusive dates, exclusions, corrupted/repeated/changing pages and page budgets.
+Real May tests traverse multiple pages and verify honest currency-unknown
+exclusions; they do not claim verified real-May monetary totals without a
+supported upstream currency source.
 A separate integration test starts the real stdio subprocess, reads synthetic
 May records and verifies the connection survives a tool error. This does not
 establish interoperability with ChatGPT, Codex or a particular Claude client.

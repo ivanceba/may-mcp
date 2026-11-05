@@ -37,7 +37,7 @@ of Git. Map these launch values to your client's supported configuration.
 ChatGPT remote access and specific Codex/Claude connection verification belong
 to later integration tasks and are not demonstrated by this example.
 
-The default read-only catalogue contains thirteen tools:
+The default read-only catalogue contains fourteen tools:
 
 - `may_list_vehicles()`: all vehicles the configured May account can access,
   with the API's `vehicles` array and `count`.
@@ -57,6 +57,8 @@ The default read-only catalogue contains thirteen tools:
 - `may_list_charging_sessions(vehicle_id, limit=100, offset=0, sort="desc")`,
   `may_get_charging_session(session_id)`, and `may_list_charger_types()`: charging
   reads and live charger discovery.
+- `may_spending_summary(vehicle_id, start_date=null, end_date=null)`: recorded
+  totals with coverage and exclusions. See the [currency limitation](summary.md).
 
 These tools declare read-only, non-destructive, idempotent behavior and external
 data access. Returned vehicle fields are untrusted data. May failures become
