@@ -6,4 +6,8 @@ from mcp.client import Client
 
 @pytest.fixture
 def mcp_client_factory():
-    return Client
+    def create(server):
+        # Force framed JSON-RPC: SDK 2's auto in-process mode bypasses framing.
+        return Client(server, mode="legacy", cache=None)
+
+    return create
