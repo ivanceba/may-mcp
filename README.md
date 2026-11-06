@@ -8,7 +8,8 @@ self-hosted vehicle manager.
 Vehicle, fuel, expense, trip and charging read and optionally enabled CRUD tools
 and the stdio MCP server are implemented. Authenticated Streamable HTTP uses an
 external OAuth provider; see [remote authentication](docs/authentication.md).
-Application-specific client integrations remain unverified.
+[Client compatibility](docs/compatibility.md) records verified Codex CLI stdio
+operations and the remaining ChatGPT, Claude Code and remote-client checks.
 The [container deployment guide](docs/deployment.md) covers the pinned non-root
 image, runtime configuration, health checks, HTTPS proxy and external auth storage.
 The [spending summary](docs/summary.md) uses May's Home Assistant Bearer API for
@@ -55,7 +56,7 @@ diff. CI checks formatting without changing files.
 Run the offline harness with `uv run --frozen pytest tests/unit tests/contract tests/protocol -q`.
 For the disposable real-May tests, Docker requirements and cleanup, see the
 [testing guide](docs/development/testing.md). The suite covers vehicle MCP calls
-and real synthetic May persistence; named consumer-client verification is pending.
+and real synthetic May persistence; see the compatibility record for named clients.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the issue, TDD, and PR workflow.
 For Codex development, follow the [agent setup guide](docs/development/agent-setup.md)
@@ -66,7 +67,8 @@ and [repository instructions](AGENTS.md).
 - Typed tools for vehicles, fuel logs, expenses, trips, and charging sessions.
 - Read-only mode by default; environment-controlled write access.
 - stdio and authenticated Streamable HTTP transports.
-- Pending: connection examples and actual verification for ChatGPT, Codex, and Claude.
+- Client setup: [ChatGPT](docs/clients/chatgpt.md), [Codex](docs/clients/codex.md),
+  and [Claude Code](docs/clients/claude.md). Unverified paths are marked explicitly.
 
 The capability inventory and delivery tracker distinguish delivered functionality
 from remaining API gaps and client/deployment verification.

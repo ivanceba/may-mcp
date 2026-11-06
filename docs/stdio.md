@@ -34,8 +34,8 @@ generic data rather than a client-specific configuration format:
 
 Replace the clone path, instance URL and key locally; keep real credentials out
 of Git. Map these launch values to your client's supported configuration.
-ChatGPT remote access and specific Codex/Claude connection verification belong
-to later integration tasks and are not demonstrated by this example.
+See the [Codex](clients/codex.md) and [Claude Code](clients/claude.md) setup guides
+and the separate [client compatibility record](compatibility.md).
 
 The default read-only catalogue contains fourteen tools:
 
@@ -107,7 +107,7 @@ The name and model remain unchanged. No mutation is retried automatically;
 verify saved state after an uncertain outcome before repeating a request.
 Disabling writes removes these tools on reconnect and the HTTP client also
 blocks mutations before any network request.
-There is no remote HTTP transport or consumer authorization in this delivery.
+For remote HTTP transport and consumer authorization, see [authentication](authentication.md).
 
 The locked official MCP SDK is used for both the server and test client. Protocol
 tests force JSON-RPC framing in memory; the real-May integration separately
