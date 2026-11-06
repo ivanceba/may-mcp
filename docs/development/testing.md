@@ -205,6 +205,11 @@ production networks, credentials or existing data volumes for these checks.
 
 ## CI and diagnostics
 
+Named application checks have a separate [compatibility record](../compatibility.md)
+and synthetic verification sequence. SDK tests do not establish ChatGPT,
+Codex or Claude application results. Before release, install from a clean clone
+without ignored planning files and follow each public client setup guide.
+
 [CI](../../.github/workflows/ci.yml) has separate quality, offline-test, and
 real-May integration jobs. Quality and offline suites run on Windows and Ubuntu;
 the real-May container job runs on Ubuntu. Missing Docker, provisioning errors,
