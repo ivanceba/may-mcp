@@ -24,6 +24,8 @@ and `may:access` scope.
    is under Plugins, plus, Add custom MCP server; account UI and policies vary.
 2. Enter the server URL and choose OAuth. Configure the matching provider client
    registration, then complete the provider's sign-in and consent flow.
+   Create and install the resulting plugin, then select it with `@` in a new
+   conversation before requesting tool execution.
 3. Inspect the discovered tools. Start read-only: expect 14 tools and successful
    `may_list_vehicles` / `may_get_vehicle` calls on synthetic data.
 4. For the disposable instance only, restart the MCP server with writes enabled,
