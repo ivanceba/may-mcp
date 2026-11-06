@@ -184,6 +184,60 @@ async def test_invalid_claims_are_not_authenticated(oauth_settings, signed_token
         await verifier.aclose()
 
 
+async def test_authelia_scope_array_authenticates_signed_principal(oauth_settings, signed_tokens):
+    token, keys = signed_tokens
+    verifier = JWTVerifier(
+        oauth_settings,
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json=keys)),
+    )
+    try:
+        result = await verifier.verify_token(
+            token(
+                omit=("scope", "azp"),
+                scp=["openid", "may:access"],
+                client_id="synthetic-authelia-client",
+            )
+        )
+        assert result is not None
+        assert result.scopes == ["openid", "may:access"]
+        assert result.client_id == "synthetic-authelia-client"
+        assert result.subject == "synthetic-user"
+        assert result.resource == "https://mcp.example.invalid/mcp"
+    finally:
+        await verifier.aclose()
+
+
+@pytest.mark.parametrize("scp", [None, "may:access", 1, [None], [1], [""], ["two scopes"]])
+async def test_malformed_authelia_scopes_are_rejected(oauth_settings, signed_tokens, scp):
+    token, keys = signed_tokens
+    verifier = JWTVerifier(
+        oauth_settings,
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json=keys)),
+    )
+    try:
+        assert await verifier.verify_token(token(omit=("scope",), scp=scp)) is None
+    finally:
+        await verifier.aclose()
+
+
+@pytest.mark.parametrize("scope", [None, ["may:access"], "openid", "openid may:access"])
+async def test_standard_scope_is_authoritative(oauth_settings, signed_tokens, scope):
+    token, keys = signed_tokens
+    verifier = JWTVerifier(
+        oauth_settings,
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json=keys)),
+    )
+    try:
+        result = await verifier.verify_token(token(scope=scope, scp=["may:access"]))
+        if isinstance(scope, str):
+            assert result is not None
+            assert result.scopes == scope.split()
+        else:
+            assert result is None
+    finally:
+        await verifier.aclose()
+
+
 async def test_signature_and_algorithm_cannot_be_substituted(oauth_settings, signed_tokens):
     token, keys = signed_tokens
     verifier = JWTVerifier(

@@ -74,7 +74,7 @@ def signed_tokens(oauth_settings):
     jwk = json.loads(jwt.algorithms.RSAAlgorithm.to_jwk(key.public_key()))
     jwk.update(kid="synthetic-key", use="sig", alg="RS256")
 
-    def token(**changes):
+    def token(*, omit=(), **changes):
         claims = {
             "iss": oauth_settings.issuer_url,
             "aud": oauth_settings.resource_url,
@@ -84,6 +84,8 @@ def signed_tokens(oauth_settings):
             "scope": "openid may:access",
             **changes,
         }
+        for name in omit:
+            claims.pop(name, None)
         return jwt.encode(claims, key, algorithm="RS256", headers={"kid": "synthetic-key"})
 
     return token, {"keys": [jwk]}

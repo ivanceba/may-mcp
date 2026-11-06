@@ -169,6 +169,17 @@ class JWTVerifier:
             subject = claims.get("sub")
             client_id = claims.get("azp", claims.get("client_id"))
             scope = claims.get("scope", "")
+            if "scope" not in claims:
+                # Authelia emits an scp array; never combine competing scope claims.
+                scp = claims.get("scp", [])
+                if not isinstance(scp, list) or any(
+                    not isinstance(value, str)
+                    or not value
+                    or any(not 33 <= ord(c) <= 126 or c in '\\"' for c in value)
+                    for value in scp
+                ):
+                    return None
+                scope = " ".join(scp)
             expiry = claims["exp"]
             if (
                 not isinstance(subject, str)
