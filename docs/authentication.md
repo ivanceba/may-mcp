@@ -143,6 +143,53 @@ A raw May API key cannot authenticate to MCP. Conversely, the configured May key
 is the only upstream Bearer credential; consumer OAuth tokens are never forwarded
 to May and May keys are never sent to the identity provider.
 
+Scope claims may use the standard space-delimited `scope` string or, when
+`scope` is absent, an `scp` array of nonempty OAuth scope-name strings. Authelia
+uses the latter format. A present `scope` is authoritative: the server does not
+merge claims or fall back from an invalid `scope`. Malformed `scp` values fail
+authentication; an absent required scope is rejected by the HTTP authorization
+middleware before any May call.
+
+### Existing Authelia providers
+
+Authelia is an alternative to the reference Keycloak profile, not a component
+installed by this repository. Its client must issue **RS256 JWT access tokens**
+(`access_token_signed_response_alg: RS256`), allow the exact resource audience,
+require PKCE S256 and register the exact callback shown by the consumer. Choose
+an available granted scope in `MAY_MCP_OAUTH_SCOPE`; Authelia 4.38's built-in
+`openid` scope can be used with the explicit subject allowlist and audience
+binding. Do not configure an unsupported custom scope or treat an ID token as
+an access token. Keep the OAuth client identifier distinct from the resource URI.
+
+For example, the following public-client fields are configuration inputs to an
+independently managed Authelia provider, not a complete production template:
+
+```yaml
+client_id: may-chatgpt
+client_name: May ChatGPT
+public: true
+authorization_policy: existing-owner-only-two-factor-policy
+redirect_uris:
+  - https://chatgpt.com/connector_platform_oauth_redirect
+scopes: [openid, offline_access]
+audience: [https://mcp.example.invalid/mcp]
+requested_audience_mode: implicit
+require_pkce: true
+pkce_challenge_method: S256
+token_endpoint_auth_method: none
+access_token_signed_response_alg: RS256
+```
+
+Use static client registration when the provider does not offer DCR or CIMD.
+Resolve the provider's subject for this client before enrollment; pairwise
+subjects can differ between clients. Verify the installed provider version's
+schema, actual JWT issuer/audience/subject/scope, refresh behavior and the named
+consumer separately. Synthetic `scp` HTTP tests establish claim handling only,
+not a successful deployed Authelia or ChatGPT connection.
+
+References: [Authelia client configuration](https://www.authelia.com/configuration/identity-providers/openid-connect/clients/)
+and [Authelia 4.38 scope-field default](https://github.com/authelia/authelia/blob/v4.38.19/internal/oidc/config.go).
+
 The fixed JWKS URL is the only key-fetch endpoint; token-provided key URLs are
 not followed. Fetches have a five-second timeout, no redirects/proxy inheritance,
 a 128 KiB body limit and at most 100 keys. Keys cache for 60 seconds, including a

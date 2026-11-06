@@ -103,8 +103,9 @@ async def test_http_requires_oauth_before_mcp_initialization(settings_factory):
 
 
 @pytest.mark.parametrize("writes", [False, True])
+@pytest.mark.parametrize("scope_format", ["scope", "scp"])
 async def test_authenticated_http_tools_and_lifespan(
-    settings_factory, oauth_settings, signed_tokens, synthetic_vehicle, writes
+    settings_factory, oauth_settings, signed_tokens, synthetic_vehicle, writes, scope_format
 ):
     token, keys = signed_tokens
     requests = []
@@ -121,11 +122,17 @@ async def test_authenticated_http_tools_and_lifespan(
         transport=httpx.MockTransport(lambda request: httpx.Response(200, json=keys)),
     )
     app = create_http_app(settings, oauth_settings, may_client=may, verifier=verifier)
+    access_token = (
+        token(omit=("scope", "azp"), scp=["openid", "may:access"], client_id="synthetic-client")
+        if scope_format == "scp"
+        else token()
+    )
     async with app.router.lifespan_context(app):
         # SDK's HTTP transport exercises serialized MCP through the real ASGI app.
         async with (
             httpx2.AsyncClient(
-                transport=httpx2.ASGITransport(app), headers={"Authorization": "Bearer " + token()}
+                transport=httpx2.ASGITransport(app),
+                headers={"Authorization": "Bearer " + access_token},
             ) as http,
             Client(
                 streamable_http_client(oauth_settings.resource_url, http_client=http),
@@ -156,6 +163,14 @@ async def test_authenticated_http_tools_and_lifespan(
         ({"iss": "https://wrong.invalid"}, 401),
         ({"exp": 1}, 401),
         ({"sub": "another-user"}, 401),
+        ({"omit": ("scope",), "scp": ["openid"]}, 403),
+        ({"omit": ("scope",), "scp": []}, 403),
+        ({"omit": ("scope",), "scp": ["may:access"], "aud": "wrong"}, 401),
+        ({"omit": ("scope",), "scp": ["may:access"], "sub": "another-user"}, 401),
+        ({"omit": ("scope",), "scp": ["may:access"], "exp": 1}, 401),
+        ({"omit": ("scope",), "scp": ["may:access"], "iss": "wrong"}, 401),
+        ({"omit": ("scope",), "scp": ["may:access", None]}, 401),
+        ({"scope": "openid", "scp": ["may:access"]}, 403),
     ],
 )
 async def test_invalid_http_token_does_not_reach_may(
