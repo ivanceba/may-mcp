@@ -17,13 +17,6 @@ PositiveId = Annotated[int, Field(gt=0, strict=True)]
 
 
 def register_charging_tools(server: MCPServer[None], client: MayClient, settings: Settings) -> None:
-    reads = ToolAnnotations(
-        read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
-    )
-    writes = ToolAnnotations(
-        read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
-    )
-
     async def request(
         method: str, path: str, payload: dict[str, Any] | None = None
     ) -> dict[str, Any]:
@@ -32,7 +25,11 @@ def register_charging_tools(server: MCPServer[None], client: MayClient, settings
         except MayError as error:
             raise ToolError(f"{error.code}: {error}") from None
 
-    @server.tool(annotations=reads)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_list_charging_sessions(
         vehicle_id: PositiveId,
         limit: Annotated[int, Field(ge=1, le=500, strict=True)] = 100,
@@ -53,12 +50,20 @@ def register_charging_tools(server: MCPServer[None], client: MayClient, settings
         except MayError as error:
             raise ToolError(f"{error.code}: {error}") from None
 
-    @server.tool(annotations=reads)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_get_charging_session(session_id: PositiveId) -> dict[str, Any]:
         """Get one accessible charging record. Energy is kWh; SoC is percent."""
         return await request("GET", f"/api/v1/charging/{session_id}")
 
-    @server.tool(annotations=reads)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_list_charger_types() -> dict[str, Any]:
         """Discover charger-type IDs and display names from the configured May instance."""
         return await request("GET", "/api/v1/charger-types")
@@ -87,7 +92,11 @@ def register_charging_tools(server: MCPServer[None], client: MayClient, settings
             session.model_dump(exclude_unset=True),
         )
 
-    @server.tool(annotations=writes)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_update_charging_session(
         session_id: PositiveId, changes: ChargingUpdate
     ) -> dict[str, Any]:
@@ -99,7 +108,11 @@ def register_charging_tools(server: MCPServer[None], client: MayClient, settings
             "PATCH", f"/api/v1/charging/{session_id}", changes.model_dump(exclude_unset=True)
         )
 
-    @server.tool(annotations=writes)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_delete_charging_session(session_id: PositiveId) -> dict[str, Any]:
         """Permanently delete an accessible charging session. No automatic retry."""
         return await request("DELETE", f"/api/v1/charging/{session_id}")

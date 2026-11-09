@@ -17,13 +17,6 @@ PositiveId = Annotated[int, Field(gt=0, strict=True)]
 
 
 def register_fuel_tools(server: MCPServer[None], client: MayClient, settings: Settings) -> None:
-    reads = ToolAnnotations(
-        read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
-    )
-    update = ToolAnnotations(
-        read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
-    )
-
     async def request(
         method: str, path: str, *, payload: dict[str, Any] | None = None
     ) -> dict[str, Any]:
@@ -32,7 +25,11 @@ def register_fuel_tools(server: MCPServer[None], client: MayClient, settings: Se
         except MayError as error:
             raise ToolError(f"{error.code}: {error}") from None
 
-    @server.tool(annotations=reads)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_list_fuel_logs(
         vehicle_id: PositiveId,
         limit: Annotated[int, Field(ge=1, le=500, strict=True)] = 100,
@@ -53,7 +50,11 @@ def register_fuel_tools(server: MCPServer[None], client: MayClient, settings: Se
         except MayError as error:
             raise ToolError(f"{error.code}: {error}") from None
 
-    @server.tool(annotations=reads)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_get_fuel_log(log_id: PositiveId) -> dict[str, Any]:
         """Get a fuel log, retaining May's odometer_confirmed and consumption fields."""
         return await request("GET", f"/api/v1/fuel/{log_id}")
@@ -81,7 +82,11 @@ def register_fuel_tools(server: MCPServer[None], client: MayClient, settings: Se
             payload=fuel.model_dump(exclude_unset=True),
         )
 
-    @server.tool(annotations=update)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_update_fuel_log(log_id: PositiveId, changes: FuelUpdate) -> dict[str, Any]:
         """Update only supplied fields. Null odometer marks unknown; zero is confirmed.
 
@@ -92,7 +97,11 @@ def register_fuel_tools(server: MCPServer[None], client: MayClient, settings: Se
             "PATCH", f"/api/v1/fuel/{log_id}", payload=changes.model_dump(exclude_unset=True)
         )
 
-    @server.tool(annotations=update)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_delete_fuel_log(log_id: PositiveId) -> dict[str, Any]:
         """Permanently delete an accessible fuel log and its attachments. No automatic retry."""
         return await request("DELETE", f"/api/v1/fuel/{log_id}")
