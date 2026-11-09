@@ -14,10 +14,6 @@ from may_mcp.models.vehicles import VehicleCreate, VehicleUpdate
 
 
 def register_vehicle_tools(server: MCPServer[None], client: MayClient, settings: Settings) -> None:
-    annotations = ToolAnnotations(
-        read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
-    )
-
     async def request(
         method: str, path: str, payload: dict[str, Any] | None = None
     ) -> dict[str, Any]:
@@ -26,12 +22,20 @@ def register_vehicle_tools(server: MCPServer[None], client: MayClient, settings:
         except MayError as error:
             raise ToolError(f"{error.code}: {error}") from None
 
-    @server.tool(annotations=annotations)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_list_vehicles() -> dict[str, Any]:
         """List vehicles accessible to the configured May account."""
         return await request("GET", "/api/v1/vehicles")
 
-    @server.tool(annotations=annotations)
+    @server.tool(
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        )
+    )
     async def may_get_vehicle(
         vehicle_id: Annotated[int, Field(gt=0, strict=True)],
     ) -> dict[str, Any]:
