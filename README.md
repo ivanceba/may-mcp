@@ -1,5 +1,7 @@
 # May MCP
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/ivanceba-may-mcp-ap68gp?v=789560449150e5dc65663c2441beee63)](https://m8ven.ai/mcp/ivanceba-may-mcp-ap68gp?s=readme)
+
 A Model Context Protocol server for [May](https://github.com/dannymcc/may), a
 self-hosted vehicle manager.
 
